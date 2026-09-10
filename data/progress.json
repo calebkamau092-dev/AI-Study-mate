@@ -1,0 +1,15 @@
+{
+    "Martin": {
+        "quiz_history": [
+            {
+                "topic": "OOP",
+                "score": 50.0
+            }
+        ],
+        "topic_scores": {
+            "OOP": [
+                50.0
+            ]
+        }
+    }
+}
