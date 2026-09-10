@@ -1,7 +1,9 @@
 import argparse
 
 from repositories.user_repository import UserRepository
+from repositories.progress_repository import ProgressRepository
 from services.auth_service import AuthService
+from services.ai_tutor import AITutor
 from utilities.validators import get_menu_choice, validate_topic
 
 
@@ -88,13 +90,13 @@ def student_menu(user):
             explain_topic()
 
         elif choice == 2:
-            take_quiz()
+            take_quiz(user)
 
         elif choice == 3:
             create_study_plan()
 
         elif choice == 4:
-            view_progress()
+            view_progress(user)
 
         elif choice == 5:
             print("\nLogging out...")
@@ -120,16 +122,82 @@ def explain_topic():
     print(f"\nYou selected: {topic}")
 
     # The AI Tutor will be connected here.
-    print("\nAI Tutor feature will generate your explanation here.")
+    tutor = AITutor()
+    explanation = tutor.explain_topic(topic)
 
+    print("\nExplanation:")
+    print(explanation)
 
-def take_quiz():
+def take_quiz(user):
     """Start a Python quiz."""
 
     print("\n--- Python Quiz ---")
-    print("Your AI-generated Python quiz will appear here.")
 
-    # Quiz functionality will be connected here.
+    topic = input("Enter the Python topic for your quiz: ")
+
+    valid, result = validate_topic(topic)
+
+    if not valid:
+        print(result)
+        return
+
+    topic = result
+
+    tutor = AITutor()
+
+    print("\nGenerating quiz...")
+
+    questions = tutor.generate_quiz(topic, 5)
+
+    if not questions:
+        print("Unable to generate quiz.")
+        return
+
+    score = 0
+
+    for question in questions:
+        print("\n" + question["question"])
+
+        for letter, option in question["options"].items():
+            print(f"{letter}. {option}")
+
+        answer = input("Your answer: ").upper()
+
+        if answer == question["correct_answer"]:
+            print("Correct!")
+            score += 1
+        else:
+            print(f"Wrong. Correct answer: {question['correct_answer']}")
+
+    print(f"\nYour score: {score}/{len(questions)}")
+    percentage = (score / len(questions)) * 100
+
+    progress_repository = ProgressRepository()
+
+    progress = progress_repository.get_user_progress(
+        user["username"]
+    )
+
+    quiz_result = {
+        "topic": topic,
+        "score": round(percentage, 2)
+    }
+
+    progress["quiz_history"].append(quiz_result)
+
+    if topic not in progress["topic_scores"]:
+        progress["topic_scores"][topic] = []
+
+    progress["topic_scores"][topic].append(
+        round(percentage, 2)
+    )
+
+    progress_repository.save_user_progress(
+        user["username"],
+        progress
+    )
+
+    print("Quiz progress saved.")
 
 
 def create_study_plan():
@@ -147,18 +215,48 @@ def create_study_plan():
 
     topic = result
 
+    study_days = input("How many days do you want to study? ")
+
     print(f"\nCreating a study plan for: {topic}")
 
-    # AI Tutor study-plan functionality will be connected here.
+    tutor = AITutor()
+
+    plan = tutor.create_study_plan(
+        "Python",
+        topic,
+        study_days
+    )
+
+    print("\nYour Study Plan:")
+    print(plan)
 
 
-def view_progress():
+
+def view_progress(user):
     """Display the student's learning progress."""
 
     print("\n--- My Progress ---")
-    print("Your quiz scores and weak topics will appear here.")
 
-    # Progress repository functionality will be connected here.
+    progress_repository = ProgressRepository()
+
+    progress = progress_repository.get_user_progress(
+        user["username"]
+    )
+
+    quiz_history = progress["quiz_history"]
+
+    if not quiz_history:
+        print("No quiz progress yet.")
+        return
+
+    print("\nQuiz History")
+
+    for result in quiz_history:
+        print(
+            f"{result['topic']}: "
+            f"{result['score']}%"
+        )
+
 
 
 def create_parser():

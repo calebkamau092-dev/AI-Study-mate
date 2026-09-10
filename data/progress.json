@@ -11,5 +11,18 @@
                 50.0
             ]
         }
+    },
+    "caleb": {
+        "quiz_history": [
+            {
+                "topic": "Python Lists",
+                "score": 40.0
+            }
+        ],
+        "topic_scores": {
+            "Python Lists": [
+                40.0
+            ]
+        }
     }
 }

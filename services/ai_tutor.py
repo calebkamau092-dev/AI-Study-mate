@@ -1,3 +1,4 @@
+import json
 import requests
 
 
@@ -39,54 +40,7 @@ class AITutor:
         except requests.exceptions.RequestException as error:
             return f"AI request failed: {error}"
 
-    def explain_topic(self, subject, topic):
-        """Generate a beginner-friendly explanation of a topic."""
-
-        prompt = f"""
-You are AI StudyMate, a friendly AI tutor.
-
-Explain the following topic to a beginner.
-
-Subject: {subject}
-Topic: {topic}
-
-Requirements:
-- Use simple language.
-- Explain the main idea clearly.
-- Give a simple example.
-- Break difficult ideas into smaller parts.
-- Do not make the explanation unnecessarily long.
-
-Start the explanation directly.
-"""
-
-        return self.ask_ai(prompt)
-
-    def generate_quiz(self, subject, topic, number_of_questions):
-        """Generate multiple-choice questions about a topic."""
-
-        prompt = f"""
-You are AI StudyMate, an educational AI tutor.
-
-Create {number_of_questions} multiple-choice questions.
-
-Subject: {subject}
-Topic: {topic}
-
-For every question provide:
-
-Question:
-A. option
-B. option
-C. option
-D. option
-Answer: A/B/C/D
-Explanation: short explanation
-
-Make the questions suitable for a student studying this topic.
-Do not include questions outside the given topic.
-"""
-
+    def _ask_ollama(self, prompt):
         return self.ask_ai(prompt)
 
     def create_study_plan(self, subjects, topics, study_days):
@@ -117,37 +71,6 @@ Requirements:
 """
 
         return self.ask_ai(prompt)
-        request_data = json.dumps(data).encode("utf-8")
-
-        request = urllib.request.Request(
-            self.url,
-            data=request_data,
-            headers={
-                "Content-Type": "application/json"
-            }
-        )
-
-        try:
-            with urllib.request.urlopen(
-                request,
-                timeout=60
-            ) as response:
-
-                result = json.loads(
-                    response.read().decode("utf-8")
-                )
-
-                return result.get("response", "").strip()
-
-        except urllib.error.URLError:
-            return None
-
-        except Exception:
-            return None
-
-    # ---------------------------------
-    # AI TOPIC EXPLANATION
-    # ---------------------------------
 
     def explain_topic(self, topic):
         prompt = f"""

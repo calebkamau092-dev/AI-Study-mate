@@ -35,7 +35,7 @@ class AuthService:
 
         password = result
 
-        existing_user = self.user_repository.find_user(username)
+        existing_user = self.user_repository.find_by_username(username)
 
         if existing_user:
             return False, "Username already exists."
@@ -61,7 +61,7 @@ class AuthService:
         if not password:
             return False, None, "Password cannot be empty."
 
-        user = self.user_repository.find_user(username)
+        user = self.user_repository.find_by_username(username)
 
         if not user:
             return False, None, "Username not found."
